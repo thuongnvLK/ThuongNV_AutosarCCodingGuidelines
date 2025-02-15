@@ -21,6 +21,13 @@ Bộ quy tắc này giúp:
 
 ## 2. Quy tắc chung
 
+### 2.1 Sử dụng tên biến, hằng số, hàm và cấu trúc có ý nghĩa
+
+-Mục đích:
+    - Giúp code dễ đọc, dễ hiểu, dễ bảo trì.
+    - Giúp các lập trình viên khác (hoặc chính bạn sau này) nhanh chóng hiểu được mục đích của biến/hàm mà không cần đọc quá nhiều code.
+    - Tránh gây nhầm lẫn khi sử dụng biến hoặc hằng số có tên mơ hồ.
+
 1️⃣ Đặt tên biến có ý nghĩa
 
 ❌ Không tốt (tên không rõ ràng, không thể hiện chức năng):
@@ -108,8 +115,18 @@ struct VehicleStatus {
     bool isEngineOn;
 };
 ```
+### 2.2 Sử dụng biến cục bộ để giảm thiểu phạm vi
+- Mục đích
+    - Tránh ảnh hưởng không mong muốn: Biến toàn cục có thể bị thay đổi ở bất kỳ đâu, dẫn đến lỗi khó kiểm soát.
+    - Tối ưu bộ nhớ: Biến cục bộ được lưu trữ trong stack, trong khi biến toàn cục chiếm bộ nhớ trong suốt vòng đời của chương trình.
+    - Dễ bảo trì: Khi biến chỉ được sử dụng trong một hàm hoặc một phạm vi nhất định, việc sửa đổi trở nên dễ dàng hơn.
+    - Tránh lỗi xung đột biến: Khi nhiều module có biến cùng tên, việc dùng biến toàn cục có thể gây lỗi.
 
-
+1️⃣ Sử dụng các biến cục bộ để giảm thiểu phạm vi của chúng
+📌 Giải thích
+    - Biến cục bộ chỉ tồn tại trong hàm hoặc khối lệnh nơi nó được khai báo.
+    - Khi chương trình thoát khỏi phạm vi đó, biến sẽ tự động bị hủy, giúp tiết kiệm bộ nhớ.
+    - Tránh được lỗi do thay đổi ngoài ý muốn, giúp code dễ hiểu và dễ bảo trì hơn.
 
 
 
