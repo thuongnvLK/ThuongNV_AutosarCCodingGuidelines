@@ -154,6 +154,85 @@ int main() {
 - speed là biến toàn cục có thể bị thay đổi bởi bất kỳ hàm nào, gây lỗi khó kiểm soát.
 - Nếu chương trình lớn, việc theo dõi giá trị của nó trở nên phức tạp.
 
+✔️ Tốt (Dùng biến cục bộ để tránh lỗi ngoài ý muốn)
+```
+#include <stdio.h>
+
+void printSpeed(int speed) {
+    printf("Tốc độ xe: %d km/h\n", speed);
+}
+
+int main() {
+    int speed = 80;  // Biến cục bộ
+    printSpeed(speed);
+    return 0;
+}
+```
+2️⃣ Biến toàn cục chỉ nên được sử dụng khi cần thiết
+📌 Giải thích
+- Biến toàn cục chỉ nên được dùng khi nhiều hàm cần truy cập cùng một dữ liệu.
+- Nếu một biến không thể thay thế bằng biến cục bộ, nên giới hạn phạm vi của nó bằng static.
+- Biến toàn cục không nên được thay đổi tùy ý, có thể sử dụng const nếu cần.
+
+❌ Không tốt (Dùng biến toàn cục một cách không cần thiết)
+```
+#include <stdio.h>
+
+int temperature;  // Biến toàn cục có thể bị thay đổi bất kỳ lúc nào
+
+void setTemperature(int t) {
+    temperature = t;  // Không có kiểm soát
+}
+
+void printTemperature() {
+    printf("Nhiệt độ hiện tại: %d°C\n", temperature);
+}
+
+int main() {
+    setTemperature(25);
+    printTemperature();
+    return 0;
+}
+```
+🚨 Vấn đề:
+- Bất kỳ hàm nào cũng có thể thay đổi temperature, gây khó khăn trong debug.
+- Nếu chương trình lớn, việc kiểm soát giá trị của temperature trở nên khó khăn.
+
+✔️ Tốt (Sử dụng static để giới hạn phạm vi nếu cần thiết)
+```
+#include <stdio.h>
+
+static int temperature;  // Biến toàn cục nhưng giới hạn phạm vi trong file
+
+void setTemperature(int t) {
+    temperature = t;
+}
+
+void printTemperature() {
+    printf("Nhiệt độ hiện tại: %d°C\n", temperature);
+}
+
+int main() {
+    setTemperature(25);
+    printTemperature();
+    return 0;
+}
+```
+✅ Lợi ích:
+- temperature vẫn là biến toàn cục nhưng chỉ có thể truy cập trong file hiện tại.
+- Tránh lỗi do thay đổi giá trị ngoài phạm vi mong muốn.
+
+📌 Khi nào nên sử dụng biến toàn cục?
+
+| **Trường hợp**                     | **Dùng biến cục bộ** | **Dùng biến toàn cục**            |
+|-------------------------------------|----------------------|----------------------------------|
+| Giá trị chỉ dùng trong một hàm     | ✅                    | ❌                               |
+| Giá trị cần chia sẻ giữa nhiều hàm  | ❌                    | ✅                               |
+| Giá trị không cần thay đổi nhiều    | ✅                    | ❌ (Nên dùng `const`)            |
+| Giá trị lưu trạng thái hệ thống     | ❌                    | ✅ (Nên dùng `static`)           |
+
+
+
 
 ---
 ## 📞 Contact
