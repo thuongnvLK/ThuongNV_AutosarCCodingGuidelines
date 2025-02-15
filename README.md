@@ -14,14 +14,10 @@
 Autosar C Coding Guidelines là bộ quy tắc lập trình được sử dụng trong ngành công nghiệp ô tô để đảm bảo tính an toàn, dễ bảo trì, tối ưu hiệu suất và giảm thiểu lỗi trong phần mềm nhúng.
 
 Bộ quy tắc này giúp:
-
-Chuẩn hóa mã nguồn, giúp dễ đọc và bảo trì.
-
-Cải thiện tính an toàn trong hệ thống nhúng Automotive.
-
-Tăng tính ổn định và hiệu suất của phần mềm.
-
-Giảm thiểu lỗi phần mềm, đặc biệt là lỗi thời gian thực (real-time errors).
+    - Chuẩn hóa mã nguồn, giúp dễ đọc và bảo trì.
+    - Cải thiện tính an toàn trong hệ thống nhúng Automotive.
+    - Tăng tính ổn định và hiệu suất của phần mềm.
+    - Giảm thiểu lỗi phần mềm, đặc biệt là lỗi thời gian thực (real-time errors).
 
 ## 2. Quy tắc chung
 
