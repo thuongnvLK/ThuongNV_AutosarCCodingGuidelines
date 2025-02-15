@@ -36,7 +36,7 @@ int vehicleSpeed;   // Tốc độ xe (km/h)
 float fuelLevel;    // Mức nhiên liệu (%)
 int numberOfPassengers; // Số lượng hành khách
 ```
-Lưu ý:
+- Lưu ý:
     - Tránh các tên chung chung như temp, val, data, info, x1, x2, y1, y2 nếu không có ý nghĩa cụ thể.
     - Sử dụng danh từ cho biến số (VD: batteryVoltage, engineTemperature).
     - Sử dụng động từ cho hàm (VD: calculateSpeed(), getTemperature()).
@@ -62,7 +62,7 @@ if (speed > MAX_SPEED) {
 }
 ```
 
-Lưu ý:
+- Lưu ý:
     - Tên hằng số nên viết hoa (MAX_SPEED, MIN_TEMPERATURE).
     - Dùng từ khóa const hoặc #define để khai báo hằng số.
     - Hằng số giúp thay đổi giá trị dễ dàng mà không phải sửa toàn bộ code.
@@ -84,7 +84,7 @@ float calculateFuelEfficiency();  // Tính toán hiệu suất nhiên liệu
 void setVehicleSpeed(int speed);  // Cài đặt tốc độ xe
 bool isBatteryLow();              // Kiểm tra pin có yếu không
 ```
-Lưu ý:
+- Lưu ý:
     - Tên hàm bắt đầu bằng động từ (VD: get, set, calculate, check).
     - Tránh viết tắt khó hiểu (calcEff() -> calculateEfficiency()).
     - Hàm trả về giá trị boolean nên có tiền tố is, has, can (isDoorOpen(), hasLowFuel()).
