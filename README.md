@@ -231,9 +231,142 @@ int main() {
 | Giá trị không cần thay đổi nhiều    | ✅                    | ❌ (Nên dùng `const`)            |
 | Giá trị lưu trạng thái hệ thống     | ❌                    | ✅ (Nên dùng `static`)           |
 
+✅ Luôn ưu tiên sử dụng biến cục bộ để giảm thiểu phạm vi sử dụng.
+✅ Biến toàn cục chỉ nên dùng khi thực sự cần thiết (ví dụ: lưu trạng thái hệ thống).
+✅ Sử dụng static nếu cần giới hạn phạm vi biến toàn cục.
+✅ Sử dụng const nếu biến không cần thay đổi.
 
+### 2.3 Sử dụng các hằng số để định nghĩa các giá trị không thay đổi trong chương trình
 
+- Tránh sử dụng số cứng (magic numbers) trong chương trình.
+- Dùng #define hoặc const để định nghĩa giá trị không đổi.
+- Tên hằng số nên được viết hoa và sử dụng dấu gạch dưới (_) để phân tách từ.
 
+❌ Không tốt (Dùng số cứng):
+```
+if (speed > 120) {   // 120 nghĩa là gì?
+    applyBrakes();
+}
+```
+✔️ Tốt (Dùng hằng số):
+```
+#define MAX_SPEED 120
+if (speed > MAX_SPEED) {
+    applyBrakes();
+}
+```
+✔️ Tốt (Dùng const để định nghĩa hằng số kiểu dữ liệu cụ thể):
+```
+const int MAX_TEMPERATURE = 100;
+const float PI = 3.14159;
+```
+✅ Lợi ích:
+
+- Dễ hiểu hơn khi đọc code.
+- Khi cần thay đổi giá trị, chỉ cần sửa đổi một lần tại nơi định nghĩa hằng số.
+- Giúp chương trình dễ bảo trì và tránh lỗi do nhập sai số.
+
+### 2.4 Khai báo các biến ở đầu của khối mã. Nếu có thể, hãy khai báo và gán giá trị ban đầu cho biến cùng lúc.
+
+1️⃣ Tại sao nên khai báo biến ở đầu khối mã?
+
+- Dễ đọc và bảo trì: Khi tất cả biến được khai báo ở đầu khối mã, lập trình viên dễ dàng thấy tất cả biến cần thiết mà không cần tìm kiếm trong khối mã.
+- Hạn chế lỗi truy cập biến chưa được khởi tạo: Nếu khai báo biến rải rác trong khối mã, có thể xảy ra trường hợp sử dụng biến trước khi được gán giá trị.
+- Tăng tính nhất quán trong lập trình: Việc khai báo ở đầu giúp người đọc dễ theo dõi biến nào được sử dụng trong một khối mã cụ thể.
+
+❌ Không tốt (Khai báo biến giữa khối mã một cách lộn xộn)
+```
+#include <stdio.h>
+
+void calculateArea() {
+    int length = 5; // Biến khai báo giữa hàm
+    int area;
+    
+    printf("Chiều dài: %d\n", length);
+
+    int width = 10;  // Khai báo sau khi đã có logic code phía trên
+    area = length * width;  // Lúc này mới đủ biến để tính toán
+
+    printf("Diện tích: %d\n", area);
+}
+```
+🚨 Vấn đề:
+- Biến width được khai báo sau khi đã có logic khác. Điều này khiến người đọc khó xác định danh sách biến của hàm ngay từ đầu.
+- area không được gán giá trị ngay khi khai báo, có thể gây lỗi nếu sử dụng trước khi được khởi tạo.
+
+✔️ Tốt (Khai báo biến ngay đầu khối mã và gán giá trị ban đầu)
+
+```
+#include <stdio.h>
+
+void calculateArea() {
+    int length = 5;  // Khai báo và gán giá trị ngay lập tức
+    int width = 10;  // Biến được khai báo ở đầu khối mã
+    int area = length * width;  // Gán giá trị ngay khi khai báo
+
+    printf("Chiều dài: %d\n", length);
+    printf("Diện tích: %d\n", area);
+}
+```
+✅ Lợi ích:
+- Dễ đọc: Mọi biến cần thiết đều xuất hiện ngay khi vào khối mã.
+- Tránh lỗi truy cập biến chưa được khởi tạo.
+- Gọn gàng, dễ bảo trì hơn.
+
+2️⃣ Nên gán giá trị ban đầu khi khai báo nếu có thể
+- Hạn chế lỗi khi biến chưa được gán giá trị – Nếu không khởi tạo ngay, biến có thể chứa giá trị rác.
+- Tăng hiệu suất – Tránh việc phải gán giá trị nhiều lần trong các điều kiện khác nhau.
+
+❌ Không tốt (Khai báo nhưng không gán giá trị ngay)
+```
+#include <stdio.h>
+
+void processTemperature() {
+    int temperature; // Chưa gán giá trị ngay
+    int threshold = 30;
+
+    if (threshold > 25) {
+        temperature = 35;  // Gán giá trị sau khi đã có điều kiện
+    }
+
+    printf("Nhiệt độ: %d°C\n", temperature);
+}
+```
+🚨 Vấn đề:
+- Nếu threshold <= 25, biến temperature có thể chứa giá trị rác khi in ra.
+- Có thể dẫn đến lỗi không mong muốn trong chương trình.
+
+✔️ Tốt (Gán giá trị ngay khi khai báo)
+```
+#include <stdio.h>
+
+void processTemperature() {
+    int temperature = 20;  // Gán giá trị mặc định ngay khi khai báo
+    int threshold = 30;
+
+    if (threshold > 25) {
+        temperature = 35;  // Cập nhật giá trị nếu cần
+    }
+
+    printf("Nhiệt độ: %d°C\n", temperature);
+}
+```
+✅ Lợi ích:
+- Biến luôn có giá trị hợp lệ trước khi sử dụng.
+- Không có rủi ro đọc giá trị rác từ bộ nhớ.
+- Tránh được lỗi logic khi chương trình thực thi.
+
+📌 Tổng kết
+
+| **Trường hợp**                     | **Không tốt ❌**                                | **Tốt ✔️**                                      |
+|-------------------------------------|-----------------------------------------------|------------------------------------------------|
+| **Khai báo biến trong khối mã**     | Biến được khai báo rải rác trong code         | Biến được khai báo ngay đầu khối mã            |
+| **Gán giá trị ngay khi khai báo**   | Biến có thể chưa được khởi tạo trước khi sử dụng | Biến luôn có giá trị hợp lệ                     |
+| **Dễ đọc & bảo trì**                | Khó theo dõi danh sách biến của một hàm      | Dễ dàng hiểu tất cả biến cần thiết khi vào hàm |
+
+✅ Khai báo tất cả các biến ở đầu khối mã để giúp code dễ đọc và tránh lỗi.
+✅ Gán giá trị ngay khi khai báo nếu có thể để tránh lỗi do sử dụng biến chưa được khởi tạo.
+✅ Tránh khai báo biến rải rác giữa khối mã để tăng tính nhất quán và dễ bảo trì.
 ---
 ## 📞 Contact
 Email: individual.thuongnguyen@gmail.com    
