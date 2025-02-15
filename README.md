@@ -123,6 +123,7 @@ struct VehicleStatus {
     - Tránh lỗi xung đột biến: Khi nhiều module có biến cùng tên, việc dùng biến toàn cục có thể gây lỗi.
 
 1️⃣ Sử dụng các biến cục bộ để giảm thiểu phạm vi của chúng
+
 📌 Giải thích
 
     - Biến cục bộ chỉ tồn tại trong hàm hoặc khối lệnh nơi nó được khai báo.
