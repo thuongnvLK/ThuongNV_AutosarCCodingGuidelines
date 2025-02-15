@@ -2082,18 +2082,235 @@ if ((x & 1) == 0) {  // Kiểm tra số chẵn bằng toán tử bitwise
 | **🔟**  | Tránh sử dụng toán tử ba ngôi (`?:`) quá dài      | `result = (x > 0) ? ((y > 0) ? 1 : -1) : 0;`| **Dùng `if-else` để rõ ràng hơn**            |
 | **1️⃣1️⃣** | Hạn chế dùng `%` nếu có thể thay thế         | `if (x % 2 == 0)`                          | `if ((x & 1) == 0)`                          |
 
+### 9. Quy tắc về cấu trúc và liên kết
 
+– Tập tin mã nguồn nên được phân chia thành các tập tin nhỏ hơn để dễ dàng quản lý và tái sử dụng mã.
 
+– Tên các tập tin và biến nên được đặt sao cho dễ hiểu và mô tả được chức năng của chúng.
 
+– Các biến và hằng nên được khai báo ở đầu tập tin và được sắp xếp theo thứ tự chữ cái.
 
+– Các hằng số nên được định nghĩa bằng các macro và được đặt tên theo dạng chữ hoa và các từ cách nhau bởi dấu gạch dưới.
 
+– Các hàm nên được sắp xếp theo thứ tự chức năng và tên hàm nên được đặt sao cho mô tả được chức năng của hàm.
 
+– Các hàm nên được định nghĩa trước khi sử dụng và các hàm nên được khai báo ở đầu tập tin.
 
+– Tên tham số của các hàm nên được đặt sao cho mô tả được dữ liệu mà tham số đại diện.
 
+– Các lệnh nên được định dạng sao cho dễ đọc và dễ hiểu.
 
+– Các khối lệnh nên được đặt trong cặp dấu ngoặc nhọn và được thụt đầu dòng sao cho dễ đọc và hiểu.
 
+– Các biến nên được khai báo ở phạm vi nhỏ nhất có thể để tránh lỗi không xác định.
 
+📌 Tóm tắt bảng quy tắc về Cấu trúc và Liên kết
 
+| Quy tắc                              | Không tốt ❌                          | Tốt ✔️                                    |
+|--------------------------------------|--------------------------------------|------------------------------------------|
+| **Chia nhỏ file mã nguồn**           | Toàn bộ code trong một file          | Chia thành nhiều file `.c` và `.h`      |
+| **Đặt tên biến, hàm dễ hiểu**        | `int x, y;`                         | `int vehicleSpeed;`                      |
+| **Sắp xếp biến và hằng theo thứ tự chữ cái** | Lộn xộn, khó theo dõi               | `#define MAX_SIZE 100` trước `#define MIN_SIZE 0` |
+| **Định nghĩa macro đúng quy tắc**     | `#define MaxSize 100`               | `#define MAX_SIZE 100`                   |
+| **Sắp xếp hàm theo chức năng**       | Lộn xộn                             | Nhóm hàm theo từng module               |
+| **Thụt đầu dòng, đặt dấu `{}` hợp lý** | Code khó đọc                         | Code rõ ràng, dễ bảo trì                 |
+| **Khai báo biến trong phạm vi nhỏ nhất** | Dùng biến toàn cục không cần thiết  | Dùng biến cục bộ khi có thể              |
+
+### 10. Quy tắc về xử lý chuỗi
+
+– Sử dụng hằng số để lưu độ dài tối đa của chuỗi.
+
+– Sử dụng các hàm chuẩn như strncpy() hoặc memcpy() để sao chép chuỗi.
+
+– Kiểm tra kích thước đầu vào của chuỗi để tránh các lỗi tràn bộ đệm.
+
+– Sử dụng các hàm chuẩn như strcmp() hoặc strncmp() để so sánh chuỗi.
+
+– Sử dụng các hàm chuẩn như strcat() hoặc strncat() để nối chuỗi.
+
+– Kiểm tra giá trị trả về của các hàm xử lý chuỗi để xử lý các lỗi.
+
+```
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_LENGTH 100
+
+void copyString(char *dest, const char *src)
+{
+    size_t length = strlen(src);
+    if (length >= MAX_LENGTH)
+    {
+        printf("Error: source string is too long\n");
+        return;
+    }
+    strncpy(dest, src, length);
+    dest[length] = '\0';
+}
+
+int main()
+{
+    char str1[MAX_LENGTH] = "Hello";
+    char str2[MAX_LENGTH] = "World";
+    char str3[MAX_LENGTH];
+
+    copyString(str3, str1);
+    printf("str3: %s\n", str3);
+
+    strcat(str1, " ");
+    strncat(str1, str2, MAX_LENGTH - strlen(str1) - 1);
+    printf("str1: %s\n", str1);
+
+    if (strncmp(str1, "Hello World", MAX_LENGTH) == 0)
+    {
+        printf("The strings match!\n");
+    }
+    else
+    {
+        printf("The strings do not match.\n");
+    }
+
+    return 0;
+}
+```
+- Trong ví dụ trên, hàm copyString() được sử dụng để sao chép chuỗi từ src sang dest. Hằng số MAX_LENGTH được sử dụng để giới hạn độ dài của chuỗi và tránh lỗi tràn bộ đệm. Hàm strncat() được sử dụng để nối chuỗi str2 vào str1 với số lượng ký tự tối đa được tính toán để tránh lỗi tràn bộ đệm. Hàm strncmp() được sử dụng để so sánh hai chuỗi. Giá trị trả về của các hàm xử lý chuỗi được kiểm tra để xử lý các lỗi.
+
+### 11. Quy tắc về xử lý số học
+
+– Tránh sử dụng toán tử chia (/) với số nguyên: Nếu một biểu thức chứa toán tử chia (/) với số nguyên, kết quả sẽ được chuyển đổi thành số nguyên và làm tròn về phía không gần nhất. Điều này có thể dẫn đến sai sót trong tính toán.
+
+– Sử dụng phép chia hợp lệ cho số thực: Tránh sử dụng toán tử chia (/) với số thực, vì nó có thể dẫn đến sai số trong tính toán. Thay vào đó, sử dụng các phép chia hợp lệ cho số thực như phép chia liên tục (floating-point division) hoặc phép nhân với nghịch đảo (multiply by inverse).
+
+– Tránh tràn số: Khi thực hiện các phép tính số học, cần kiểm tra tràn số để tránh kết quả không xác định hoặc sai sót trong tính toán.
+
+– Sử dụng các hàm toán học chuẩn: Các hàm toán học chuẩn như sqrt(), sin(), cos(), tan() đã được kiểm tra và xác định rằng chúng hoạt động đúng với mọi trường hợp. Vì vậy, nên sử dụng các hàm này thay vì tự viết hàm toán học của riêng mình.
+
+– Đảm bảo độ chính xác của tính toán: Khi thực hiện các tính toán phức tạp hoặc yêu cầu độ chính xác cao, cần sử dụng các thư viện toán học đáng tin cậy hoặc các thuật toán tính toán độ chính xác cao.
+
+    Ví dụ, theo tiêu chuẩn Autosar C Coding Guidelines, nếu ta muốn tính giá trị của sin(x) với x là một số thực, ta nên sử dụng hàm sin() được cung cấp sẵn trong thư viện math.h thay vì tự viết hàm sin() của riêng mình. Nếu muốn kiểm tra độ chính xác của kết quả, ta có thể so sánh giá trị tính toán được với giá trị đã biết của sin(x) trong một số trường hợp cụ thể.
+
+### 12 Quy tắc về hàm và tham số
+
+- Tên hàm và tham số:
+    – Tên hàm và tham số nên được đặt sao cho dễ hiểu và mô tả được chức năng của chúng.
+    – Tên hàm nên bắt đầu bằng một động từ hoặc chữ viết tắt mô tả chức năng của hàm.
+    – Tên tham số nên được đặt sao cho mô tả được dữ liệu mà tham số đại diện.
+- Tên hàm: Bắt đầu bằng một động từ mô tả chức năng của hàm, ví dụ như calculate, initialize, validate, set, get, process,…
+- Tên tham số: Nên được đặt sao cho mô tả được dữ liệu mà tham số đại diện, ví dụ như input, output, value, pointer, length, index,…
+- Nên tránh viết tắt và các ký tự đặc biệt.
+```
+// Hàm tính giá trị tuyệt đối của số nguyên
+int calculateAbsoluteValue(int input);
+// Hàm đặt giá trị cho biến
+void setVariableValue(int *pointer, int value);
+// Hàm xử lý chuỗi
+void processString(char *inputString, int length);
+// Hàm lấy giá trị từ mảng
+int getValueFromArray(int *array, int index);
+```
+- Định dạng hàm:
+    – Hàm nên được định dạng sao cho dễ đọc và dễ hiểu.
+    – Hàm nên được phân chia thành các phần rõ ràng như đầu vào, xử lý và đầu ra.
+    – Hàm nên được viết theo một chuẩn nhất định để dễ đọc và hiểu.
+    - Ví dụ về việc định dạng hàm cho một thuộc tính trong một struct như sau:
+```
+/**
+ * @brief Structure containing the properties of a car
+ */
+typedef struct {
+    uint8_t speed;  /**< Speed of the car in km/h */
+    uint8_t fuel_level;  /**< Fuel level of the car in percent */
+} car_properties_t;
+/**
+ * @brief Function to update the speed of a car
+ *
+ * @param car Pointer to the car properties struct
+ * @param new_speed The new speed of the car in km/h
+ */
+void update_car_speed(car_properties_t *car, uint8_t new_speed)
+{
+    car->speed = new_speed;
+}
+```
+- Trong ví dụ này, hàm update_car_speed được định dạng rõ ràng với đầu vào là car và new_speed, và không có giá trị trả về. Hàm được chia thành các phần rõ ràng như đầu vào (car và new_speed), xử lý (cập nhật giá trị của thuộc tính speed trong car) và không có đầu ra.
+
+- Ngoài ra, các comment được sử dụng để giải thích chức năng của hàm và các thuộc tính của struct, giúp cho việc đọc code dễ hiểu và dễ bảo trì hơn.
+
+- Các quy tắc về tham số: Tham số đầu vào nên được khai báo là const để bảo vệ chúng khỏi việc thay đổi bất hợp lý.
+
+- void print_array(const int *arr, int size) {
+    for (int i = 0; i < size; i++) {
+        printf("%d ", arr[i]);
+    }
+}
+
+- Trong ví dụ này, tham số đầu vào arr được khai báo là const int *, cho phép hàm sử dụng giá trị của mảng arr nhưng không cho phép thay đổi giá trị của mảng này.
+
+- Lưu ý: Vì sao dùng const int *arr thay vì truyền toàn bộ mảng? Thay vì truyền toàn bộ mảng (dẫn đến sao chép dữ liệu) → tốn bộ nhớ & hiệu suất kém., cách tối ưu hơn là truyền con trỏ đến mảng, nhưng đánh dấu const để tránh thay đổi dữ liệu.
+
+- Tham số nên được truyền theo giá trị nếu không cần thiết phải thay đổi giá trị đó.
+```
+int sum(int a, int b) {
+    return a + b;
+}
+```
+- Trong ví dụ này, tham số a và b được truyền theo giá trị, vì hàm sum không cần phải thay đổi giá trị của a và b.
+
+- Tham số nên được truyền theo con trỏ nếu cần phải thay đổi giá trị đó.
+```
+void swap(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+```
+- Trong ví dụ này, tham số a và b được truyền theo con trỏ, cho phép hàm swap thay đổi giá trị của a và b bằng cách sử dụng con trỏ.
+
+- Các quy tắc về giá trị trả về của hàm:
+    – Hàm nên trả về một giá trị duy nhất để tránh lỗi không xác định.
+    – Giá trị trả về của hàm nên được xác định trước khi thực hiện hàm và được đưa ra trong tài liệu hướng dẫn sử dụng của hàm.
+    – Giá trị trả về của hàm nên được xử lý sao cho phù hợp với mục đích của hàm.
+
+```
+/**
+ * @brief Tính tổng các phần tử trong một mảng.
+ * 
+ * @param arr Mảng đầu vào.
+ * @param size Kích thước của mảng.
+ * @return Tổng các phần tử trong mảng.
+ */
+int sumArray(const int arr[], int size) {
+    int sum = 0;
+    for(int i = 0; i < size; i++) {
+        sum += arr[i];
+    }
+    return sum;
+}
+```
+
+- Trong ví dụ này, hàm sumArray trả về một giá trị nguyên duy nhất – tổng các phần tử trong mảng đầu vào. Giá trị trả về đã được xác định trước khi thực hiện hàm và được đưa ra trong tài liệu hướng dẫn sử dụng của hàm. Ngoài ra, giá trị trả về đã được xử lý sao cho phù hợp với mục đích của hàm – tính tổng các phần tử trong mảng.
+
+- Các quy tắc về việc gọi hàm:
+    – Gọi hàm với đúng tên và đúng kiểu trả về của hàm 
+    – Gọi hàm với đúng số lượng tham số và kiểu dữ liệu của chúng
+    – Gọi hàm với các tham số hợp lệ để tránh lỗi không xác định
+    – Gọi hàm với đúng thứ tự của các tham số
+
+```
+// Hàm tính diện tích hình chữ nhật
+float calculateRectangleArea(float length, float width) {
+    return length * width;
+}
+int main() {
+    float length = 4.0;
+    float width = 5.0;
+    // Gọi hàm tính diện tích hình chữ nhật với các tham số đúng kiểu và đúng thứ tự
+    float area = calculateRectangleArea(length, width);
+    return 0;
+}
+```
+
+- Trong ví dụ trên, hàm calculateRectangleArea được gọi với đúng kiểu và đúng thứ tự của các tham số, và sử dụng các biến hợp lệ là length và width để tính toán diện tích của hình chữ nhật.
 
 
 ---
