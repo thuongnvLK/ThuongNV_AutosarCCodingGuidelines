@@ -124,6 +124,7 @@ struct VehicleStatus {
 
 1️⃣ Sử dụng các biến cục bộ để giảm thiểu phạm vi của chúng
 📌 Giải thích
+
     - Biến cục bộ chỉ tồn tại trong hàm hoặc khối lệnh nơi nó được khai báo.
     - Khi chương trình thoát khỏi phạm vi đó, biến sẽ tự động bị hủy, giúp tiết kiệm bộ nhớ.
     - Tránh được lỗi do thay đổi ngoài ý muốn, giúp code dễ hiểu và dễ bảo trì hơn.
