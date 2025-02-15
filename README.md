@@ -130,8 +130,29 @@ struct VehicleStatus {
 - Khi chương trình thoát khỏi phạm vi đó, biến sẽ tự động bị hủy, giúp tiết kiệm bộ nhớ.
 - Tránh được lỗi do thay đổi ngoài ý muốn, giúp code dễ hiểu và dễ bảo trì hơn.
 
+❌ Không tốt (Dùng biến toàn cục không cần thiết)
+```
+#include <stdio.h>
 
+int speed;  // Biến toàn cục - có thể bị thay đổi ở bất kỳ đâu
 
+void setSpeed(int s) {
+    speed = s;  // Không rõ ai có thể thay đổi giá trị này
+}
+
+void printSpeed() {
+    printf("Tốc độ xe: %d km/h\n", speed);
+}
+
+int main() {
+    setSpeed(80);
+    printSpeed();  // Có thể bị thay đổi ở nơi khác mà không rõ nguyên nhân
+    return 0;
+}
+```
+🚨 Vấn đề:
+- speed là biến toàn cục có thể bị thay đổi bởi bất kỳ hàm nào, gây lỗi khó kiểm soát.
+- Nếu chương trình lớn, việc theo dõi giá trị của nó trở nên phức tạp.
 
 
 ---
