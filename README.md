@@ -115,6 +115,70 @@ struct VehicleStatus {
     bool isEngineOn;
 };
 ```
+✅ Lợi ích:
+- Không cần mở struct vẫn hiểu được nó lưu dữ liệu gì.
+
+❌ Không tốt (Tên enum chung chung, khó hiểu)
+```
+enum Mode {
+    OFF, ON, AUTO
+};
+```
+🚨 Vấn đề:
+- "ON" có nghĩa gì? ON cái gì?
+- Có thể gây nhầm lẫn với các trạng thái khác trong chương trình.
+
+✔️ Tốt (Tên enum rõ ràng, có tiền tố nhận diện)
+```
+enum EngineMode {
+    ENGINE_OFF,
+    ENGINE_ON,
+    ENGINE_AUTO
+};
+```
+✅ Lợi ích:
+- Không bị nhầm với các enum khác.
+- Dễ hiểu ngay từ tên gọi.
+
+5️⃣ Đặt tên biến có tiền tố để phân biệt kiểu dữ liệu
+
+- Tiền tố giúp dễ nhận biết kiểu dữ liệu của biến ngay từ tên biến.
+❌ Không tốt (Tên biến không rõ kiểu dữ liệu)
+```
+int num = 10;
+float level = 5.5;
+```
+✔️ Tốt (Dùng tiền tố nhận dạng kiểu dữ liệu)
+```
+int iNumCars = 10;       // Biến int lưu số xe
+float fFuelLevel = 5.5;  // Biến float lưu mức nhiên liệu
+```
+✅ Lợi ích:
+- Dễ hiểu ngay từ tên biến mà không cần đọc dòng khai báo.
+- Hạn chế lỗi do nhầm kiểu dữ liệu.
+
+
+📌 Quy tắc đặt tên theo kiểu CamelCase, PascalCase và Snake_Case
+
+| **Loại**              | **Quy tắc**                       | **Ví dụ tốt**                        |
+|----------------------|--------------------------------|------------------------------------|
+| **Biến & Hàm**       | Dùng **camelCase**            | `calculateSpeed()`, `fuelLevel`  |
+| **Struct, Enum**     | Dùng **PascalCase**           | `struct CarModel`, `enum DriveMode` |
+| **Hằng số**          | Dùng **SNAKE_CASE**           | `#define MAX_SPEED 120`           |
+| **Tiền tố kiểu dữ liệu** | Dùng **prefix để nhận diện kiểu** | `iNumCars` (int), `fFuelLevel` (float) |
+
+
+### 📌 So sánh đặt tên không tốt và tốt
+
+| **Loại**   | **Không tốt ❌**         | **Tốt ✔️**                  |
+|------------|-------------------------|-----------------------------|
+| **Biến**   | `int x, y, z;`          | `int vehicleSpeed;`        |
+| **Hằng số**| `#define VALUE 120`      | `#define MAX_SPEED 120`     |
+| **Hàm**    | `void process();`       | `void processUserInput();` |
+| **Struct** | `struct Info {};`       | `struct CarStatus {};`     |
+| **Enum**   | `enum Mode {ON, OFF};`  | `enum EngineMode {ENGINE_ON};` |
+
+
 ### 2.2 Sử dụng biến cục bộ để giảm thiểu phạm vi
 - Mục đích
     - Tránh ảnh hưởng không mong muốn: Biến toàn cục có thể bị thay đổi ở bất kỳ đâu, dẫn đến lỗi khó kiểm soát.
@@ -358,6 +422,60 @@ void processTemperature() {
 - Biến luôn có giá trị hợp lệ trước khi sử dụng.
 - Không có rủi ro đọc giá trị rác từ bộ nhớ.
 - Tránh được lỗi logic khi chương trình thực thi.
+
+❌ Không tốt (Khai báo biến bên trong vòng lặp không cần thiết)
+```
+#include <stdio.h>
+
+void printNumbers() {
+    for (int i = 0; i < 5; i++) {
+        int number = i * 2;  // Khai báo biến ngay trong vòng lặp
+        printf("%d ", number);
+    }
+}
+```
+🚨 Vấn đề:
+- Biến number được tạo lại trong mỗi vòng lặp, gây tốn tài nguyên không cần thiết.
+- Biến bị cấp phát và giải phóng liên tục, không tối ưu hiệu suất.
+
+✔️ Tốt (Khai báo biến trước vòng lặp nếu không cần thay đổi mỗi lần lặp)
+```
+#include <stdio.h>
+
+void printNumbers() {
+    int number;  // Khai báo biến trước vòng lặp để tránh cấp phát lại nhiều lần
+
+    for (int i = 0; i < 5; i++) {
+        number = i * 2;
+        printf("%d ", number);
+    }
+}
+```
+✅ Lợi ích:
+Tối ưu bộ nhớ, vì biến không bị cấp phát lại trong mỗi lần lặp.
+Hiệu suất tốt hơn so với khai báo bên trong vòng lặp.
+
+📌 Khi nào nên khai báo biến ngay khi cần sử dụng?
+
+Mặc dù Autosar khuyến nghị khai báo biến ở đầu khối mã, nhưng có một số trường hợp ngoại lệ.Ví dụ: Nếu một biến chỉ dùng trong một nhánh if hoặc for, có thể khai báo ngay lúc cần để tiết kiệm bộ nhớ.
+
+✔️ Ví dụ hợp lý (Khai báo trong phạm vi cần thiết)
+```
+#include <stdio.h>
+
+void checkEvenOdd(int number) {
+    if (number % 2 == 0) {
+        int isEven = 1;  // Biến chỉ dùng trong nhánh này
+        printf("%d là số chẵn\n", number);
+    } else {
+        int isOdd = 1;  // Biến chỉ dùng trong nhánh này
+        printf("%d là số lẻ\n", number);
+    }
+}
+```
+✅ Lợi ích:
+- Biến isEven và isOdd chỉ tồn tại khi cần, giúp tiết kiệm bộ nhớ.
+
 
 📌 Tổng kết
 
@@ -644,16 +762,403 @@ if (file == NULL) {
 ✅ Lợi ích:
 - Chương trình không bị crash nếu có lỗi.
 
+### 3. Quy tắt đặt tên
+
+**1️⃣ Sử dụng tên biến, hằng số, hàm và cấu trúc có ý nghĩa**
+**🔍 Giải thích**
+- Tên biến, hằng số, hàm và cấu trúc cần **phản ánh chính xác chức năng và mục đích của chúng**.
+- Tránh sử dụng tên chung chung như `x`, `y`, `temp`, `data`.
+
+**❌ Không tốt (Tên không có ý nghĩa)**
+```c
+int x, y, z;
+float a;
+void func();
+```
+**✔️ Tốt (Tên có ý nghĩa, dễ hiểu)**
+```c
+int vehicleSpeed;    // Tốc độ xe
+float fuelLevel;     // Mức nhiên liệu
+void calculateFuelConsumption(); // Tính toán mức tiêu thụ nhiên liệu
+```
+**2️⃣ Sử dụng các từ viết tắt chỉ khi cần thiết**
+
+- Tránh dùng từ viết tắt không rõ ràng, trừ khi chúng rất phổ biến (CPU, RAM, LED).
+- Nếu bắt buộc phải dùng, hãy đảm bảo tất cả lập trình viên đều hiểu ý nghĩa của nó.
+
+❌ Không tốt (Dùng từ viết tắt khó hiểu)
+
+```
+int tmpVar;  // "tmpVar" là gì? Temporary variable hay Temperature Variable?
+```
+🚨 Vấn đề:
+- Từ viết tắt tmpVar có thể gây hiểu lầm.
+
+✔️ Tốt (Chỉ dùng từ viết tắt phổ biến hoặc dễ hiểu)
+```
+int tempVariable;   // Biến nhiệt độ (Temperature Variable)
+int cpuLoad;        // Tải của CPU
+```
+✅ Lợi ích:
+- Tránh nhầm lẫn, dễ đọc.
+- Người mới đọc code không cần đoán nghĩa của biến.
+
+3️⃣ Sử dụng CamelCase cho các biến và hàm
+
+- CamelCase: Chữ cái đầu tiên viết thường, các từ sau viết hoa (camelCase).
+- Dùng cho tên biến và tên hàm.
+
+❌ Không tốt (Không theo quy tắc CamelCase)
+```
+int vehicle_speed;
+void get_vehicle_info();
+```
+🚨 Vấn đề:
+- Dùng dấu gạch dưới _ thay vì CamelCase.
+
+✔️ Tốt (Dùng CamelCase)
+```
+int vehicleSpeed;
+void getVehicleInfo();
+```
+✅ Lợi ích:
+- Thống nhất với tiêu chuẩn đặt tên của Autosar C.
+- Dễ đọc hơn, đặc biệt khi so với snake_case trong ngôn ngữ khác như Python.
+
+4️⃣ Sử dụng PascalCase cho struct và enum
+
+- PascalCase: Chữ cái đầu của mỗi từ viết hoa (PascalCase).
+- Dùng cho struct, enum, class.
+
+❌ Không tốt (Không dùng PascalCase)
+```
+struct car_model { ... };
+enum drive_mode { OFF, ON };
+```
+🚨 Vấn đề:
+- car_model và drive_mode không theo chuẩn PascalCase.
+
+✔️ Tốt (Dùng PascalCase)
+```
+struct CarModel { ... };
+enum DriveMode { OFF, ON };
+```
+✅ Lợi ích:
+- Thống nhất cách đặt tên giữa struct và enum.
+- Dễ phân biệt với biến và hàm, giúp code dễ đọc.
+
+5️⃣ Sử dụng chữ hoa cho các hằng số
+
+- Hằng số nên viết toàn bộ bằng chữ hoa, cách nhau bằng dấu _ (SNAKE_CASE).
+- Giúp phân biệt rõ ràng với biến thông thường.
+
+❌ Không tốt (Không dùng chữ hoa cho hằng số)
+```
+const int MaxSpeed = 120;
+```
+🚨 Vấn đề:
+- MaxSpeed không tuân theo quy tắc SNAKE_CASE.
+
+✔️ Tốt (Dùng chữ hoa và dấu _)
+```
+#define MAX_SPEED 120
+const int DEFAULT_SPEED_LIMIT = 60;
+```
+✅ Lợi ích:
+- Dễ nhận diện ngay là hằng số.
+- Không gây nhầm lẫn với biến thông thường.
+
+6️⃣ Sử dụng từ khóa đặc biệt (const, static) để làm rõ vai trò của biến
+
+- const: Dùng để khai báo biến không thay đổi được.
+- static: Dùng để giới hạn phạm vi của biến trong file hoặc hàm.
+
+❌ Không tốt (Không chỉ rõ biến là hằng số hay cục bộ)
+```
+int maxSpeed = 120;  // Biến này có thể bị thay đổi ngoài ý muốn
+```
+✔️ Tốt (Dùng const và static để làm rõ vai trò)
+```
+const int MAX_SPEED = 120;  // Giá trị cố định
+static int counter = 0;      // Biến cục bộ, chỉ dùng trong file này
+```
+7️⃣ Đặt tên biến theo quy tắc "type + name"
+
+- Tiền tố thể hiện kiểu dữ liệu (i cho int, f cho float, p cho con trỏ, v.v.).
+
+❌ Không tốt (Tên biến không rõ kiểu dữ liệu)
+```
+int numCars;
+float salesTotal;
+```
+🚨 Vấn đề:
+- Không rõ kiểu dữ liệu ngay từ tên biến.
+
+✔️ Tốt (Thêm tiền tố để biểu thị kiểu dữ liệu)
+
+```
+int iNumCars;
+float fSalesTotal;
+
+```
+✅ Lợi ích:
+- Nhanh chóng nhận biết kiểu dữ liệu chỉ bằng cách đọc tên biến.
+
+8️⃣ Đặt tên hàm callback có hậu tố Callback
+
+- Nếu một hàm là hàm callback, hãy thêm hậu tố Callback để dễ nhận diện.
+
+❌ Không tốt (Không có hậu tố Callback)
+```
+void ButtonClicked();
+```
+🚨 Vấn đề:
+- Không rõ hàm này là một callback hay một hàm thông thường.
+
+✔️ Tốt (Thêm hậu tố Callback)
+```
+void ButtonClickedCallback();
+```
+📌 Hàm Callback
+✔️ Tốt (Dùng Callback giúp linh hoạt hơn)
+```
+#include <stdio.h>
+
+// Hàm callback thực thi một nhiệm vụ (đổi tên để rõ ràng hơn)
+void taskExecutionCallback() {
+    printf("Executing scheduled task...\n");
+}
+
+// Hàm nhận callback để thực thi một nhiệm vụ
+void scheduleTaskHandler(void (*callback)()) {
+    printf("Running scheduler...\n");
+    callback();  // Gọi callback để thực thi nhiệm vụ
+}
+
+int main() {
+    scheduleTaskHandler(taskExecutionCallback);  // Truyền callback
+    return 0;
+}
+```
+📌 Nguyên tắc đặt tên hậu tố cho callback
+
+| **Loại Callback**                          | **Hậu tố nên dùng**                 | **Ví dụ**                              |
+|--------------------------------------------|------------------------------------|--------------------------------------|
+| **Xử lý sự kiện (Event Handler)**          | `Callback`, `Handler`, `Event`     | `buttonPressCallback()`, `onDataReceivedHandler()` |
+| **Thực thi tác vụ (Execution Task)**       | `Execute`, `Task`, `Action`        | `sendDataExecute()`, `logDataTask()` |
+| **Cảm biến & tín hiệu (Sensor/Signal Processing)** | `Update`, `Change`, `Trigger`  | `temperatureUpdate()`, `signalChangeHandler()` |
+| **Giao diện người dùng (GUI Callback)**    | `On<Event>()`, `Listener`, `Click` | `onButtonClick()`, `mouseMoveListener()` |
+| **Giao tiếp (Communication Callback)**     | `Received`, `Sent`, `Process`      | `onDataReceived()`, `messageSentCallback()` |
 
 
+📌 Tổng kết quy tắc đặt tên
 
+| **Quy tắc**                          | **Không tốt ❌**                  | **Tốt ✔️**                     |
+|--------------------------------------|--------------------------------|-------------------------------|
+| **Tên biến có ý nghĩa**              | `int x, y, z;`                | `int vehicleSpeed;`           |
+| **Dùng từ viết tắt hợp lý**          | `int tmpVar;`                 | `int tempVariable;`           |
+| **Dùng CamelCase cho biến & hàm**    | `int vehicle_speed;`          | `int vehicleSpeed;`           |
+| **Dùng PascalCase cho struct & enum**| `struct car_model {};`        | `struct CarModel {};`         |
+| **Hằng số viết hoa**                 | `const int MaxSpeed = 120;`   | `#define MAX_SPEED 120`       |
+| **Dùng `const` và `static` hợp lý**  | `int maxSpeed = 120;`         | `const int MAX_SPEED = 120;`  |
+| **Đặt tên hàm callback**             | `void ButtonClicked();`       | `void ButtonClickedCallback();` |
 
+### 4. Quy tắc về comment
 
+1️⃣ Block-Level Comment (Comment cấp khối)
 
+🔍 Giải thích
+- Mục đích: Được đặt ở đầu file, module hoặc class, cung cấp thông tin tổng quan về phạm vi code.
+- Nội dung: Chứa thông tin về file, tác giả, ngày tạo, mô tả.
+- Cú pháp: Được viết trong /* */.
 
+❌ Không tốt (Thiếu thông tin mô tả file)
+```
+// sample_file.c
+int main() {
+    return 0;
+}
+```
+🚨 Vấn đề:
+- Không rõ file này dùng để làm gì.
+- Không có thông tin về tác giả, ngày tạo.
 
+✔️ Tốt (Đầy đủ thông tin với Block-Level Comment)
+```
+/*
+* File: sample_file.c
+* Author: John Doe
+* Date: 24/03/2023
+* Description: This is a sample file for demonstrating block-level comment.
+*/
+#include <stdio.h>
 
+int main() {
+    printf("Hello, world!\n");
+    return 0;
+}
+```
+✅ Lợi ích:
+- Người đọc biết file này dùng để làm gì.
+- Có thông tin về tác giả và ngày tạo, giúp bảo trì dễ dàng hơn.
 
+2️⃣ Function-Level Comment (Comment cấp hàm)
+
+🔍 Giải thích
+- Mục đích: Được đặt trước một hàm để mô tả chức năng, tham số, giá trị trả về.
+- Cấu trúc:
+    - Tên hàm
+    - Mô tả chức năng
+    - Danh sách tham số (Input)
+    - Giá trị trả về (Output)
+
+❌ Không tốt (Không có mô tả rõ ràng)
+```
+int calculateSum(int a, int b) {
+    return a + b;
+}
+```
+🚨 Vấn đề:
+- Người đọc không biết hàm này dùng để làm gì.
+- Không rõ kiểu dữ liệu của tham số và giá trị trả về.
+
+✔️ Tốt (Đầy đủ thông tin với Function-Level Comment)
+
+```
+/*
+* Function: calculateSum
+* Description: This function calculates the sum of two integers.
+* Input:
+*   a - an integer value
+*   b - an integer value
+* Output:
+*   returns the sum of a and b
+*/
+int calculateSum(int a, int b) {
+    return a + b;
+}
+```
+✅ Lợi ích:
+- Dễ dàng hiểu ý nghĩa của hàm mà không cần đọc code bên trong.
+- Giúp hạn chế lỗi khi sử dụng sai kiểu dữ liệu hoặc tham số.
+
+### 5. Quy tắc về xử lý lỗi
+
+1️⃣ Tránh sử dụng goto để xử lý lỗi
+
+🔍 Giải thích
+Không nên dùng goto vì nó làm code khó đọc, khó debug và dễ gây lỗi.
+Nên dùng if-else hoặc switch-case để xử lý lỗi một cách có tổ chức.
+
+❌ Không tốt (Dùng goto)
+```
+int process_data(int data) {
+    int result = 0;
+    if (data < 0) {
+        goto error;
+    }
+    result = data * 2;
+    return result;
+error:
+    return -1;
+}
+```
+🚨 Vấn đề:
+- goto error; làm chương trình khó theo dõi khi debug.
+- Khi có nhiều lỗi hơn, sẽ có nhiều nhãn error, khiến code rối và khó duy trì.
+
+✔️ Tốt (Dùng if-else)
+```
+int process_data(int data) {
+    if (data < 0) {
+        return -1;
+    }
+    int result = data * 2;
+    return result;
+}
+```
+✅ Lợi ích:
+- Code gọn gàng, dễ đọc, dễ debug.
+- Không cần theo dõi jump của goto, giúp chương trình dễ hiểu hơn.
+
+2️⃣ Dùng hằng số để đại diện cho mã lỗi (Error Codes)
+
+🔍 Giải thích
+- Không nên dùng số nguyên trực tiếp (-1, 0, 1) để báo lỗi vì nó không rõ nghĩa.
+- Nên định nghĩa hằng số lỗi (#define ERROR_CODE) để code dễ hiểu hơn.
+
+❌ Không tốt (Dùng số cứng -1)
+```
+int open_file() {
+    FILE* fp = fopen("file.txt", "r");
+    if (fp == NULL) {
+        return -1;  // Không rõ nghĩa
+    }
+    return 0;
+}
+```
+🚨 Vấn đề:
+- Người đọc không biết -1 có nghĩa là gì.
+- Nếu có nhiều loại lỗi khác nhau, việc dùng số cứng sẽ gây nhầm lẫn.
+
+✔️ Tốt (Dùng hằng số lỗi)
+```
+#define FILE_OPEN_FAILED -1
+
+int open_file() {
+    FILE* fp = fopen("file.txt", "r");
+    if (fp == NULL) {
+        return FILE_OPEN_FAILED;
+    }
+    return 0;
+}
+```
+✅ Lợi ích:
+- Dễ đọc, dễ bảo trì, không cần nhớ -1 là lỗi gì.
+- Nếu sau này cần thay đổi mã lỗi (-2, -100...), chỉ cần sửa hằng số.
+
+3️⃣ Sử dụng các hàm xử lý lỗi chuẩn (perror(), strerror())
+
+🔍 Giải thích
+- Không nên dùng printf() để báo lỗi vì nó không cung cấp thông tin chi tiết.
+- Nên dùng perror() hoặc strerror() để hiển thị thông báo lỗi mô tả chi tiết nguyên nhân.
+
+❌ Không tốt (Dùng printf() để báo lỗi)
+```
+void process_data() {
+    int result = some_function();
+    if (result == -1) {
+        printf("Error: Some error occurred\n");
+    }
+}
+```
+🚨 Vấn đề:
+- Không rõ lỗi là do tệp tin, bộ nhớ hay kết nối.
+- Người dùng phải tự đoán nguyên nhân lỗi.
+
+✔️ Tốt (Dùng perror())
+```
+#include <stdio.h>
+#include <errno.h>
+
+void process_data() {
+    int result = some_function();
+    if (result == -1) {
+        perror("Error");
+    }
+}
+```
+✅ Lợi ích:
+- perror("Error") sẽ tự động in lỗi hệ thống kèm mô tả chi tiết (ví dụ: "No such file or directory").
+- Không cần tự định nghĩa thông báo lỗi, giúp tăng độ chính xác khi debug.
+
+📌 Tổng kết Quy tắc xử lý lỗi
+
+| **Quy tắc xử lý lỗi**      | **Không tốt ❌**                  | **Tốt ✔️**                                |
+|---------------------------|--------------------------------|--------------------------------|
+| **Tránh dùng `goto`**     | Xử lý lỗi bằng `goto error;`  | Sử dụng `if-else` để xử lý lỗi rõ ràng |
+| **Sử dụng hằng số lỗi**    | Trả về số cứng (`-1`, `0`, `1`) | Định nghĩa mã lỗi bằng `#define` |
+| **Dùng hàm xử lý lỗi chuẩn** | `printf("Error occurred");`  | `perror("Error");` để in lỗi chi tiết |
 
 
 ---
