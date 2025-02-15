@@ -232,8 +232,11 @@ int main() {
 | Giá trị lưu trạng thái hệ thống     | ❌                    | ✅ (Nên dùng `static`)           |
 
 ✅ Luôn ưu tiên sử dụng biến cục bộ để giảm thiểu phạm vi sử dụng.
+
 ✅ Biến toàn cục chỉ nên dùng khi thực sự cần thiết (ví dụ: lưu trạng thái hệ thống).
+
 ✅ Sử dụng static nếu cần giới hạn phạm vi biến toàn cục.
+
 ✅ Sử dụng const nếu biến không cần thay đổi.
 
 ### 2.3 Sử dụng các hằng số để định nghĩa các giá trị không thay đổi trong chương trình
@@ -370,6 +373,287 @@ void processTemperature() {
 ✅ Gán giá trị ngay khi khai báo nếu có thể để tránh lỗi do sử dụng biến chưa được khởi tạo.
 
 ✅ Tránh khai báo biến rải rác giữa khối mã để tăng tính nhất quán và dễ bảo trì.
+
+### 2.5 Sử dụng các toán tử và hàm thư viện chuẩn của ngôn ngữ
+
+- Hàm thư viện chuẩn được tối ưu về hiệu suất và độ tin cậy.
+- Tránh viết lại những chức năng có sẵn, giúp code ngắn gọn và dễ đọc.
+- Giảm thiểu lỗi do tự viết lại các phép toán hoặc xử lý chuỗi.
+
+❌ Không tốt (Viết lại hàm có sẵn một cách không cần thiết)
+
+```
+#include <stdio.h>
+
+// Viết lại hàm tính độ dài chuỗi (không cần thiết)
+int stringLength(const char *str) {
+    int length = 0;
+    while (str[length] != '\0') {
+        length++;
+    }
+    return length;
+}
+
+int main() {
+    char name[] = "Autosar";
+    printf("Length: %d\n", stringLength(name));
+    return 0;
+}
+```
+🚨 Vấn đề:
+- Hàm stringLength() thực hiện công việc mà strlen() trong <string.h> đã làm.
+- Tốn công viết lại và có thể có lỗi không mong muốn.
+
+✔️ Tốt (Sử dụng thư viện chuẩn)
+
+```
+#include <stdio.h>
+#include <string.h>  // Dùng thư viện có sẵn
+
+int main() {
+    char name[] = "Autosar";
+    printf("Length: %lu\n", strlen(name)); // Sử dụng hàm chuẩn strlen()
+    return 0;
+}
+```
+✅ Lợi ích:
+- Code ngắn gọn, dễ hiểu.
+- Tận dụng tối ưu hóa của thư viện chuẩn.
+
+### 2.6  Sử dụng lệnh điều kiện và vòng lặp một cách cẩn thận
+
+- Vòng lặp và điều kiện không hợp lý có thể gây hiệu năng kém và khó đọc.
+- Lồng ghép if-else quá mức làm code khó hiểu.
+
+❌ Không tốt (Dùng if-else không tối ưu)
+```
+if (x == 1) {
+    action1();
+} else if (x == 2) {
+    action2();
+} else if (x == 3) {
+    action3();
+} else {
+    actionDefault();
+}
+```
+🚨 Vấn đề:
+- Quá nhiều lệnh if-else, làm code dài dòng, khó mở rộng.
+
+✔️ Tốt (Dùng switch-case để tối ưu)
+```
+switch (x) {
+    case 1:
+        action1();
+        break;
+    case 2:
+        action2();
+        break;
+    case 3:
+        action3();
+        break;
+    default:
+        actionDefault();
+}
+```
+✅ Lợi ích:
+- Nhanh hơn và dễ đọc hơn.
+- Dễ bảo trì, chỉ cần thêm case mới nếu cần.
+
+### 2.7 Tránh sử dụng quá nhiều tham số trong hàm
+
+- Nếu hàm có quá nhiều tham số, nó trở nên khó hiểu và khó gọi đúng.
+- Nên dùng struct hoặc class để truyền nhóm tham số liên quan.
+
+❌ Không tốt (Quá nhiều tham số riêng lẻ)
+```
+void configureCar(int speed, int fuel, int temperature, int engineMode, int airPressure) {
+    // Code xử lý
+}
+```
+🚨 Vấn đề:
+- Khi gọi hàm, dễ nhầm lẫn thứ tự các tham số.
+- Khi cần thêm một tham số mới, phải sửa đổi tất cả nơi gọi hàm.
+
+✔️ Tốt (Dùng struct để đóng gói các tham số)
+```
+typedef struct {
+    int speed;
+    int fuel;
+    int temperature;
+    int engineMode;
+    int airPressure;
+} CarConfig;
+
+void configureCar(CarConfig config) {
+    // Code xử lý
+}
+
+int main() {
+    CarConfig car = {120, 80, 30, 1, 35};
+    configureCar(car);
+    return 0;
+}
+```
+✅ Lợi ích:
+- Dễ đọc, dễ mở rộng.
+- Không lo nhầm thứ tự tham số.
+
+### 2.8 Sử dụng cấu trúc dữ liệu và lớp đối tượng hợp lý
+
+- Tránh truy cập trực tiếp vào thành viên của struct.
+- Sử dụng getter/setter để bảo vệ dữ liệu.
+
+❌ Không tốt (Truy cập trực tiếp vào biến)
+```
+typedef struct {
+    int speed;
+} Car;
+
+int main() {
+    Car car;
+    car.speed = 120;  // Truy cập trực tiếp
+    return 0;
+}
+```
+🚨 Vấn đề:
+- Nếu sau này cần kiểm soát dữ liệu, phải sửa đổi tất cả nơi truy cập biến.
+
+✔️ Tốt (Dùng hàm getter và setter)
+```
+#include <stdio.h>
+
+typedef struct {
+    int speed;
+    int fuelLevel;
+} Car;
+
+// Hàm setter để kiểm soát giá trị tốc độ
+void setSpeed(Car *car, int speed) {
+    if (speed >= 0 && speed <= 200) {  // Giới hạn tốc độ
+        car->speed = speed;
+    } else {
+        printf("Invalid speed value!\n");
+    }
+}
+
+// Hàm getter để lấy giá trị tốc độ
+int getSpeed(Car car) {
+    return car.speed;
+}
+
+// Hàm setter để kiểm soát mức nhiên liệu
+void setFuelLevel(Car *car, int fuel) {
+    if (fuel >= 0 && fuel <= 100) {  // Giới hạn mức nhiên liệu
+        car->fuelLevel = fuel;
+    } else {
+        printf("Invalid fuel level!\n");
+    }
+}
+
+// Hàm getter để lấy mức nhiên liệu
+int getFuelLevel(Car car) {
+    return car.fuelLevel;
+}
+
+int main() {
+    Car myCar;
+    setSpeed(&myCar, 120);   // Gán tốc độ một cách kiểm soát
+    setFuelLevel(&myCar, 80); // Gán mức nhiên liệu một cách kiểm soát
+
+    printf("Speed: %d km/h\n", getSpeed(myCar));
+    printf("Fuel Level: %d%%\n", getFuelLevel(myCar));
+
+    return 0;
+}
+```
+✅ Lợi ích:
+- Bảo vệ dữ liệu: Không thể thay đổi giá trị speed hoặc fuelLevel ngoài phạm vi cho phép.
+- Tăng tính bảo trì: Nếu cần thay đổi logic kiểm tra dữ liệu, chỉ cần sửa trong setter, không cần sửa toàn bộ chương trình.
+- Dễ mở rộng: Nếu cần thêm thuộc tính, chỉ cần thêm vào struct và viết thêm getter/setter.
+
+### 2.9 Sử dụng comment để giải thích mã
+
+- Comment giúp người khác hiểu logic của code.
+- Không nên viết comment dư thừa.
+
+❌ Không tốt (Comment không cần thiết)
+
+```
+int speed = 100; // Đặt tốc độ bằng 100
+speed += 10; // Cộng thêm 10 vào tốc độ
+```
+🚨 Vấn đề:
+- Comment không mang lại giá trị bổ sung.
+
+✔️ Tốt (Comment rõ ý nghĩa của code)
+```
+/* Giới hạn tốc độ tối đa cho xe */
+#define MAX_SPEED 120
+
+void setSpeed(int *speed, int value) {
+    /* Đảm bảo tốc độ không vượt quá giới hạn */
+    if (value > MAX_SPEED) {
+        *speed = MAX_SPEED;
+    } else {
+        *speed = value;
+    }
+}
+```
+✅ Lợi ích:
+- Comment giải thích phần khó hiểu chứ không lặp lại code.
+
+### 2.10  Sử dụng kiểu dữ liệu phù hợp
+
+- Tránh dùng kiểu dữ liệu lớn hơn mức cần thiết.
+
+❌ Không tốt (Dùng kiểu không phù hợp)
+```
+int isEngineOn = 1;  // Biến bool nhưng dùng int
+```
+🚨 Vấn đề:
+- Lãng phí bộ nhớ nếu chỉ cần lưu true/false.
+
+✔️ Tốt (Dùng bool thay vì int)
+```
+#include <stdbool.h>
+bool isEngineOn = true;
+```
+✅ Lợi ích:
+- Tiết kiệm bộ nhớ và dễ hiểu hơn.
+
+### 2.11 Kiểm tra lỗi và xử lý ngoại lệ đúng cách
+
+- Không nên bỏ qua giá trị trả về của hàm quan trọng.
+
+❌ Không tốt (Không kiểm tra lỗi khi mở file)
+```
+FILE *file = fopen("data.txt", "r");
+```
+🚨 Vấn đề:
+- Nếu file không tồn tại, chương trình sẽ bị lỗi.
+
+✔️ Tốt (Kiểm tra lỗi sau khi mở file)
+```
+FILE *file = fopen("data.txt", "r");
+if (file == NULL) {
+    perror("Error opening file");
+    return -1;
+}
+```
+✅ Lợi ích:
+- Chương trình không bị crash nếu có lỗi.
+
+
+
+
+
+
+
+
+
+
+
 
 
 ---
