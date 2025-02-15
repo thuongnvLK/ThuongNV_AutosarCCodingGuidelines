@@ -1152,6 +1152,102 @@ void process_data() {
 - perror("Error") sẽ tự động in lỗi hệ thống kèm mô tả chi tiết (ví dụ: "No such file or directory").
 - Không cần tự định nghĩa thông báo lỗi, giúp tăng độ chính xác khi debug.
 
+4️⃣ Kiểm tra lỗi ngay sau khi gọi hàm (Check Error Immediately)
+
+- Luôn kiểm tra kết quả của hàm ngay sau khi gọi để tránh lỗi lan rộng.
+- Không nên bỏ qua giá trị trả về của hàm, đặc biệt với các hàm mở file, cấp phát bộ nhớ, v.v.
+
+❌ Không tốt (Không kiểm tra lỗi sau khi gọi hàm)
+```
+FILE *fp = fopen("data.txt", "r");
+// Không kiểm tra xem fopen có thành công không
+fprintf(fp, "Writing data...\n");
+fclose(fp);
+```
+🚨 Vấn đề:
+- Nếu fopen() thất bại (fp == NULL), chương trình sẽ gây lỗi truy cập bộ nhớ (segmentation fault).
+
+✔️ Tốt (Kiểm tra lỗi ngay lập tức)
+```
+FILE *fp = fopen("data.txt", "r");
+if (fp == NULL) {
+    perror("Failed to open file");
+    return FILE_OPEN_FAILED;
+}
+fprintf(fp, "Writing data...\n");
+fclose(fp);
+```
+✅ Lợi ích:
+- Tránh lỗi truy cập bộ nhớ khi file không thể mở.
+- Giúp phát hiện lỗi sớm, dễ debug hơn.
+
+5️⃣ Tránh xử lý lỗi chung chung (Generic Error Handling)
+
+- Không nên trả về mã lỗi chung chung như -1 hoặc NULL.
+- Nên sử dụng mã lỗi cụ thể và có ý nghĩa.
+
+❌ Không tốt (Trả về lỗi chung chung)
+```
+int readSensor() {
+    if (sensor_read() < 0) {
+        return -1;  // Không rõ lỗi gì
+    }
+    return 0;
+}
+```
+🚨 Vấn đề:
+- Không biết lỗi do cảm biến mất kết nối, dữ liệu sai hay lỗi phần cứng.
+
+✔️ Tốt (Dùng mã lỗi cụ thể)
+```
+#define SENSOR_DISCONNECTED -1
+#define SENSOR_DATA_INVALID -2
+
+int readSensor() {
+    int status = sensor_read();
+    if (status == NO_CONNECTION) {
+        return SENSOR_DISCONNECTED;
+    } else if (status == INVALID_DATA) {
+        return SENSOR_DATA_INVALID;
+    }
+    return 0;
+}
+```
+✅ Lợi ích:
+- Dễ dàng phân biệt lỗi, từ đó có cách xử lý thích hợp.
+- Giúp chương trình ổn định hơn khi có lỗi.
+
+6️⃣ Ghi log lỗi để dễ debug (Logging Errors for Debugging)
+
+- Khi phát hiện lỗi, nên ghi log để giúp debug dễ dàng hơn.
+- Dùng fprintf(stderr, ...) hoặc hệ thống logging thay vì chỉ trả về mã lỗi.
+
+❌ Không tốt (Chỉ trả về mã lỗi mà không ghi log)
+```
+int connectToServer() {
+    if (network_connect() < 0) {
+        return NETWORK_FAILED;
+    }
+    return 0;
+}
+```
+🚨 Vấn đề:
+- Không biết lỗi xảy ra khi nào và tại đâu.
+
+✔️ Tốt (Ghi log lỗi giúp debug dễ dàng hơn)
+```
+int connectToServer() {
+    if (network_connect() < 0) {
+        fprintf(stderr, "Error: Failed to connect to server\n");
+        return NETWORK_FAILED;
+    }
+    return 0;
+}
+```
+✅ Lợi ích:
+- Dễ tìm nguyên nhân lỗi hơn khi debug.
+- Ghi lại lịch sử lỗi giúp cải thiện phần mềm về lâu dài.
+
 📌 Tổng kết Quy tắc xử lý lỗi
 
 | **Quy tắc xử lý lỗi**      | **Không tốt ❌**                  | **Tốt ✔️**                                |
@@ -1159,6 +1255,845 @@ void process_data() {
 | **Tránh dùng `goto`**     | Xử lý lỗi bằng `goto error;`  | Sử dụng `if-else` để xử lý lỗi rõ ràng |
 | **Sử dụng hằng số lỗi**    | Trả về số cứng (`-1`, `0`, `1`) | Định nghĩa mã lỗi bằng `#define` |
 | **Dùng hàm xử lý lỗi chuẩn** | `printf("Error occurred");`  | `perror("Error");` để in lỗi chi tiết |
+
+
+### 6. Quy tắc về định dạng code
+
+1️⃣ Khoảng trắng và dòng trống
+
+🔍 Giải thích
+- Sử dụng khoảng trắng và dòng trống để phân tách các phần code quan trọng giúp dễ đọc hơn.
+- Nên để dòng trống giữa các hàm, khối lệnh lớn, hoặc đoạn code có chức năng khác nhau.
+
+❌ Không tốt (Code dính chặt, khó đọc)
+```
+if(condition){
+// Code xử lý lỗi
+printf("Error occurred\n");}
+```
+🚨 Vấn đề:
+- Không có khoảng trắng sau if(condition).
+- {} không có dòng trống, gây khó đọc.
+
+✔️ Tốt (Có khoảng trắng và dòng trống hợp lý)
+```
+if (condition) {
+    // Code xử lý lỗi
+    printf("Error occurred\n");
+}
+```
+✅ Lợi ích:
+- Dễ nhìn, dễ hiểu, code gọn gàng hơn.
+
+2️⃣ Thụt đầu dòng (Indentation - Sử dụng 4 khoảng trắng)
+
+🔍 Giải thích
+- Luôn thụt đầu dòng 4 khoảng trắng, KHÔNG dùng tab.
+- Giúp code có cấu trúc rõ ràng, dễ theo dõi logic.
+
+❌ Không tốt (Không thụt đầu dòng hoặc dùng tab)
+```
+void example_function(){
+if(condition){
+printf("Condition met\n");
+}
+else{
+printf("Condition not met\n");
+}
+}
+```
+🚨 Vấn đề:
+- {} không thụt đầu dòng rõ ràng.
+- if, else không rõ ràng, dễ gây nhầm lẫn.
+
+✔️ Tốt (Thụt đầu dòng 4 khoảng trắng)
+```
+void example_function() {
+    if (condition) {
+        printf("Condition met\n");
+    } else {
+        printf("Condition not met\n");
+    }
+}
+```
+✅ Lợi ích:
+- Cấu trúc logic rõ ràng, dễ đọc hơn.
+
+3️⃣ Khoảng trắng trong phép toán
+
+🔍 Giải thích
+- Nên dùng khoảng trắng trước và sau các toán tử (+, -, =, ==, etc.) để code dễ đọc hơn.
+
+❌ Không tốt (Không có khoảng trắng)
+```
+int result=num1+num2*value;
+```
+🚨 Vấn đề:
+- Code khó đọc, dính chặt vào nhau.
+
+✔️ Tốt (Có khoảng trắng hợp lý)
+
+```
+int result = num1 + num2 * value;
+```
+✅ Lợi ích:
+- Dễ hiểu hơn, giảm lỗi đọc sai công thức.
+
+4️⃣ Khoảng trắng trong danh sách tham số hàm
+
+🔍 Giải thích
+- Dùng khoảng trắng sau dấu , trong danh sách tham số hàm để tăng khả năng đọc.
+
+❌ Không tốt (Không có khoảng trắng sau ,)
+```
+void example_function(int arg1,float arg2,char arg3) {
+    // Code here
+}
+```
+🚨 Vấn đề:
+- Khó đọc vì các tham số dính vào nhau.
+
+✔️ Tốt (Dùng khoảng trắng sau dấu ,)
+```
+void example_function(int arg1, float arg2, char arg3) {
+    // Code here
+}
+```
+✅ Lợi ích:
+- Rõ ràng, dễ đọc danh sách tham số.
+
+5️⃣ Giới hạn chiều dài dòng code (Không quá 80 ký tự)
+
+🔍 Giải thích
+- Không nên viết một dòng quá dài, vì sẽ khó đọc trên màn hình nhỏ hoặc cửa sổ terminal.
+- Nếu một dòng quá dài (hơn 80 ký tự), hãy chia nhỏ thành nhiều dòng.
+
+❌ Không tốt (Dòng code quá dài, khó đọc)
+```
+void example_function(int arg1, float arg2, char arg3) { if (arg1 > 0 && arg2 < 10.0 && arg3 == 'A') { // Thực hiện lệnh } }
+```
+🚨 Vấn đề:
+- Khó đọc, dễ bị cuộn ngang khi xem trên màn hình nhỏ.
+
+✔️ Tốt (Chia nhỏ dòng dài thành nhiều dòng)
+```
+void example_function(int arg1, float arg2, char arg3) {
+    if (arg1 > 0 && 
+        arg2 < 10.0 && 
+        arg3 == 'A') 
+    {
+        // Thực hiện lệnh
+    }
+}
+```
+✅ Lợi ích:
+- Dễ đọc, dễ bảo trì, không bị cuộn ngang.
+
+6️⃣ Luôn dùng {} trong if-else, ngay cả khi chỉ có một dòng
+
+- Tránh lỗi logic khi mở rộng code.
+- Dễ đọc, dễ duy trì.
+
+❌ Không tốt (Không có {})
+```
+if (condition)
+    printf("Condition met\n");
+```
+🚨 Vấn đề:
+- Nếu thêm dòng mới mà quên {}, chương trình có thể chạy sai logic.
+
+✔️ Tốt (Luôn dùng {})
+```
+if (condition) {
+    printf("Condition met\n");
+}
+```
+✅ Lợi ích:
+- Dễ mở rộng code mà không gây lỗi.
+
+7️⃣ Thụt đầu dòng chuẩn trong switch-case
+
+- Tránh lỗi thiếu break; gây fall-through ngoài ý muốn.
+Dễ đọc hơn.
+
+❌ Không tốt (Không thụt đầu dòng đúng)
+```
+switch (status) {
+case READY:
+printf("Ready\n");
+break;
+case RUNNING:
+printf("Running\n");
+break;
+default:
+printf("Unknown\n");
+}
+```
+🚨 Vấn đề:
+- case không thụt đầu dòng đúng, dễ gây lỗi đọc sai logic.
+
+✔️ Tốt (Thụt đầu dòng chuẩn)
+```
+switch (status) {
+    case READY:
+        printf("Ready\n");
+        break;
+    case RUNNING:
+        printf("Running\n");
+        break;
+    default:
+        printf("Unknown\n");
+}
+```
+✅ Lợi ích:
+- Tránh lỗi fall-through, dễ đọc hơn.
+
+8️⃣ Cách đặt dấu * khi khai báo con trỏ
+
+- Tránh nhầm lẫn giữa con trỏ và biến thông thường.
+
+❌ Không tốt (Dấu * dính vào kiểu dữ liệu)
+```
+int* ptr, var;  // Không rõ ràng, var không phải là con trỏ
+```
+🚨 Vấn đề:
+- Nhiều người hiểu lầm rằng cả ptr và var đều là con trỏ.
+
+✔️ Tốt (Dấu * gần tên biến)
+```
+int *ptr, var;  // Rõ ràng: ptr là con trỏ, var là biến thường
+```
+✅ Lợi ích:
+- Tránh nhầm lẫn về kiểu dữ liệu.
+
+9️⃣ Tránh dòng trống dư thừa trong code
+
+❌ Không tốt (Dòng trống dư thừa giữa các lệnh)
+```
+void example() {
+
+    int x = 10;
+
+
+    int y = 20;
+
+    printf("Sum: %d\n", x + y);
+
+}
+```
+🚨 Vấn đề:
+- Dòng trống dư thừa làm gián đoạn logic, khó đọc hơn.
+
+✔️ Tốt (Chỉ dùng dòng trống khi cần thiết)
+```
+void example() {
+    int x = 10;
+    int y = 20;
+    
+    printf("Sum: %d\n", x + y);
+}
+```
+✅ Lợi ích:
+- Code gọn gàng, không mất không gian không cần thiết.
+
+🔟 Đặt dấu = cách nhau khi gán giá trị
+
+-  Giúp dễ dàng đọc và hiểu các phép gán.
+
+❌ Không tốt (Dính chặt = vào biến hoặc giá trị)
+```
+int x=10;
+float y=2.5;
+```
+🚨 Vấn đề:
+Khó đọc, đặc biệt khi có nhiều phép gán trong một hàm.
+
+✔️ Tốt (Khoảng trắng giữa biến, = và giá trị)
+```
+int x = 10;
+float y = 2.5;
+```
+
+### 7. Quy tắc về sử dụng bộ nhớ
+
+1️⃣ Không sử dụng con trỏ NULL
+
+- Nếu một con trỏ NULL được dereference (*ptr), hệ thống có thể bị crash ngay lập tức.
+- Lỗi runtime khó debug khi con trỏ NULL không được kiểm tra trước khi sử dụng.
+
+❌ Không tốt (Sử dụng con trỏ NULL mà không kiểm tra)
+```
+int *ptr = NULL;  // Con trỏ NULL, nếu sử dụng sẽ gây lỗi
+*ptr = 10;        // Lỗi runtime: Dereference NULL pointer
+```
+🚨 Vấn đề:
+Nếu ptr chưa được cấp phát bộ nhớ hợp lệ, truy cập vào nó sẽ gây lỗi segmentation fault.
+
+✔️ Tốt (Luôn kiểm tra trước khi sử dụng con trỏ)
+```
+int num = 10;
+int *ptr = &num; // Con trỏ luôn trỏ tới một vùng nhớ hợp lệ
+
+if (ptr != NULL) {
+    *ptr = 20;  // Đảm bảo an toàn khi truy cập con trỏ
+}
+```
+✅ Lợi ích:
+- Đảm bảo con trỏ luôn hợp lệ trước khi sử dụng.
+
+2️⃣ Sử dụng kích thước phù hợp cho kiểu dữ liệu
+
+- Tránh lãng phí bộ nhớ khi khai báo kiểu dữ liệu không cần thiết.
+- Đảm bảo chương trình hoạt động chính xác trên nhiều vi điều khiển khác nhau.
+
+❌ Không tốt (Dùng kiểu dữ liệu quá lớn so với cần thiết)
+```
+long int counter = 100;  // Không cần thiết dùng long int nếu giá trị nhỏ
+```
+🚨 Vấn đề:
+- long int tốn nhiều bộ nhớ hơn int, trong khi giá trị chỉ nằm trong phạm vi của int.
+
+✔️ Tốt (Dùng kiểu dữ liệu phù hợp với phạm vi giá trị)
+```
+int counter = 100;  // Tiết kiệm bộ nhớ, đủ dùng
+```
+✅ Lợi ích:
+- Tối ưu hóa bộ nhớ và đảm bảo hiệu suất.
+
+3️⃣ Sử dụng các phép toán bit thích hợp
+
+- Phép toán bit (&, |, ^, <<, >>) nhanh hơn so với các phép toán số học thông thường.
+- Giúp tiết kiệm bộ nhớ và tăng tốc độ xử lý.
+
+❌ Không tốt (Dùng phép toán số học thay vì bitwise)
+```
+int isEven(int num) {
+    return num % 2 == 0;  // Phép chia (modulo) tốn nhiều tài nguyên
+}
+```
+✔️ Tốt (Dùng phép toán bit thay vì modulo)
+```
+int isEven(int num) {
+    return (num & 1) == 0;  // Kiểm tra bit cuối để xác định số chẵn
+}
+```
+✅ Lợi ích:
+- Tăng tốc độ xử lý do phép toán bit nhanh hơn modulo.
+
+4️⃣ Không sử dụng đệ quy trong lập trình nhúng
+
+- Mỗi lần gọi đệ quy, hệ thống phải tạo một stack frame mới, dẫn đến tốn bộ nhớ stack nhanh chóng.
+- Có nguy cơ tràn stack (stack overflow) nếu không có điều kiện dừng hợp lệ.
+
+❌ Không tốt (Dùng đệ quy tính giai thừa)
+```
+int factorial(int n) {
+    if (n == 0) return 1;
+    return n * factorial(n - 1);  // Gọi đệ quy liên tục
+}
+```
+🚨 Vấn đề:
+- Mỗi lần gọi factorial(n - 1), một stack frame mới được tạo.
+
+✔️ Tốt (Dùng vòng lặp thay vì đệ quy)
+```
+int factorial(int n) {
+    int result = 1;
+    for (int i = 1; i <= n; ++i) {
+        result *= i;
+    }
+    return result;
+}
+```
+✅ Lợi ích:
+- Không cần stack frame bổ sung, tiết kiệm bộ nhớ hơn.
+
+5️⃣ Tránh sử dụng hàm delay() hoặc usleep() trong hệ thống nhúng
+
+- delay() chặn toàn bộ CPU, làm hệ thống không thể xử lý các tác vụ khác.
+- Sử dụng interrupt (ngắt) hoặc timer sẽ tối ưu hơn.
+
+❌ Không tốt (Dùng delay())
+```
+void loop() {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(1000);  // Chặn CPU 1 giây
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(1000);
+}
+```
+🚨 Vấn đề:
+- Trong 1 giây, CPU không thể làm gì khác ngoài chờ.
+
+✔️ Tốt (Dùng timer thay thế delay())
+```
+#include <TimerOne.h>
+int ledState = LOW;
+
+void setup() {
+    pinMode(LED_BUILTIN, OUTPUT);
+    Timer1.initialize(1000000);  // 1 giây
+    Timer1.attachInterrupt(timerISR);
+}
+
+void loop() {
+    // Không bị chặn CPU, có thể làm việc khác
+}
+
+void timerISR() {
+    ledState = !ledState;
+    digitalWrite(LED_BUILTIN, ledState);
+}
+```
+✅ Lợi ích:
+- Không làm chậm hệ thống, cho phép CPU xử lý các tác vụ khác song song.
+
+6️⃣ Kiểm tra giới hạn bộ nhớ khi cấp phát động
+
+- Tránh lỗi tràn bộ nhớ heap, dẫn đến crash hệ thống.
+- Giúp kiểm tra bộ nhớ có sẵn trước khi sử dụng.
+
+❌ Không tốt (Cấp phát bộ nhớ động mà không kiểm tra lỗi)
+```
+char *str = malloc(100);  // Không kiểm tra malloc có thành công hay không
+strcpy(str, "Hello World");  // Nếu malloc thất bại, chương trình có thể crash
+```
+✔️ Tốt (Luôn kiểm tra kết quả cấp phát bộ nhớ)
+
+```
+char *str = malloc(100);
+if (str == NULL) {
+    printf("Memory allocation failed!\n");
+    return;
+}
+strcpy(str, "Hello World");
+```
+✅ Lợi ích:
+- Tránh lỗi khi bộ nhớ không đủ để cấp phát.
+
+7️⃣ Tránh rò rỉ bộ nhớ (Memory Leak)
+
+- Nếu bộ nhớ được cấp phát bằng malloc() mà không được free(), hệ thống sẽ cạn kiệt bộ nhớ, đặc biệt trong hệ thống nhúng với bộ nhớ hạn chế.
+
+
+❌ Không tốt (Quên giải phóng bộ nhớ động)
+```
+char *buffer = (char *)malloc(100);
+strcpy(buffer, "Hello World");
+// Không có free(buffer), gây rò rỉ bộ nhớ
+```
+🚨 Vấn đề:
+- Nếu chương trình chạy liên tục và tiếp tục cấp phát bộ nhớ, hệ thống sẽ hết RAM.
+
+✔️ Tốt (Luôn giải phóng bộ nhớ sau khi sử dụng)
+```
+char *buffer = (char *)malloc(100);
+if (buffer == NULL) {
+    printf("Memory allocation failed!\n");
+    return;
+}
+strcpy(buffer, "Hello World");
+printf("%s\n", buffer);
+free(buffer);  // Giải phóng bộ nhớ để tránh rò rỉ
+```
+✅ Lợi ích:
+Giải phóng bộ nhớ sau khi sử dụng, tránh làm cạn RAM.
+
+8️⃣ Tránh sử dụng cấp phát động trong vòng lặp hoặc hàm gọi thường xuyên
+
+- Việc gọi malloc() hoặc free() liên tục trong vòng lặp gây chậm hệ thống.
+- Hệ thống có thể bị phân mảnh bộ nhớ, làm giảm hiệu suất.
+
+❌ Không tốt (Cấp phát động trong vòng lặp)
+
+```
+for (int i = 0; i < 100; i++) {
+    int *data = (int *)malloc(sizeof(int)); // Cấp phát động mỗi lần lặp
+    *data = i;
+    printf("%d\n", *data);
+    free(data);
+}
+```
+🚨 Vấn đề:
+- Việc cấp phát và giải phóng bộ nhớ lặp lại có thể gây phân mảnh RAM, làm chậm hệ thống.
+
+✔️ Tốt (Dùng bộ nhớ tĩnh hoặc cấp phát một lần)
+```
+int data[100];  // Dùng bộ nhớ tĩnh thay vì malloc()
+for (int i = 0; i < 100; i++) {
+    data[i] = i;
+    printf("%d\n", data[i]);
+}
+```
+✅ Lợi ích:
+- Tránh phân mảnh bộ nhớ và tăng hiệu suất.
+
+9️⃣ Tránh sử dụng biến cục bộ có kích thước lớn
+
+- Biến cục bộ nằm trên stack, nếu kích thước quá lớn có thể gây tràn stack (stack overflow).
+
+❌ Không tốt (Biến cục bộ quá lớn)
+```
+void process() {
+    int largeArray[10000];  // Quá lớn, có thể làm tràn stack
+    memset(largeArray, 0, sizeof(largeArray));
+}
+```
+🚨 Vấn đề:
+- Tràn stack có thể dẫn đến crash hệ thống.
+
+✔️ Tốt (Dùng cấp phát động hoặc biến toàn cục)
+```
+#define ARRAY_SIZE 10000
+int largeArray[ARRAY_SIZE];  // Sử dụng bộ nhớ toàn cục (bên ngoài hàm)
+
+void process() {
+    memset(largeArray, 0, sizeof(largeArray));
+}
+```
+✅ Lợi ích:
+- Giảm nguy cơ tràn stack bằng cách sử dụng bộ nhớ toàn cục.
+
+1️⃣0️⃣ Sử dụng volatile khi làm việc với biến thay đổi ngoài chương trình
+
+- Trong hệ thống nhúng, các biến được cập nhật bởi ngắt (interrupt) hoặc bộ nhớ chia sẻ (shared memory) có thể bị trình biên dịch tối ưu sai, dẫn đến lỗi.
+
+❌ Không tốt (Không khai báo volatile)
+```
+int sensorValue;  // Giá trị này có thể thay đổi bởi ngắt (ISR)
+void ISR_Handler() {
+    sensorValue = read_sensor();
+}
+void loop() {
+    while (sensorValue == 0) {  // Trình biên dịch có thể tối ưu bỏ vòng lặp này
+        // Chờ dữ liệu từ sensor
+    }
+    printf("Sensor value received!\n");
+}
+```
+🚨 Vấn đề:
+- Trình biên dịch có thể tối ưu hóa bỏ vòng lặp vì không thấy sensorValue thay đổi trong chương trình chính.
+
+✔️ Tốt (Dùng volatile để đảm bảo giá trị không bị tối ưu hóa)
+```
+volatile int sensorValue;  // Biến có thể thay đổi bởi ngắt
+void ISR_Handler() {
+    sensorValue = read_sensor();
+}
+void loop() {
+    while (sensorValue == 0) {  // Luôn kiểm tra đúng giá trị thực tế
+        // Chờ dữ liệu từ sensor
+    }
+    printf("Sensor value received!\n");
+}
+```
+✅ Lợi ích:
+- Đảm bảo trình biên dịch không tối ưu hóa sai biến thay đổi do ngắt hoặc phần cứng.
+
+📌 Tổng kết Quy tắc Sử dụng Bộ Nhớ trong Autosar C Coding Guidelines  
+
+| **Quy tắc**                                   | **Không tốt ❌**                                    | **Tốt ✔️**                                      |
+|----------------------------------------------|------------------------------------------------|------------------------------------------------|
+| **1️⃣ Không sử dụng con trỏ NULL**       | `int *ptr = NULL;`                            | `if (ptr != NULL) { *ptr = 10; }` |
+| **2️⃣ Dùng kích thước phù hợp**          | `long int count = 100;`                        | `int count = 100;`                            |
+| **3️⃣ Sử dụng phép toán bit**            | `return num % 2 == 0;`                         | `return (num & 1) == 0;`                      |
+| **4️⃣ Không dùng đệ quy**                 | `return n * factorial(n - 1);`                 | `for (int i = 1; i <= n; ++i) result *= i;`  |
+| **5️⃣ Không dùng `delay()`**              | `delay(1000);`                                 | `Sử dụng Timer hoặc interrupt`               |
+| **6️⃣ Kiểm tra cấp phát bộ nhớ**         | `char *str = malloc(100);`                     | `if (str == NULL) { handle_error(); }`       |
+| **7️⃣ Tránh rò rỉ bộ nhớ**                 | `malloc(100);` nhưng không `free()`             | Luôn `free()` bộ nhớ sau khi dùng |
+| **8️⃣ Không cấp phát động trong vòng lặp** | `malloc()` và `free()` mỗi vòng lặp             | Dùng biến tĩnh hoặc cấp phát một lần |
+| **9️⃣ Không dùng biến cục bộ quá lớn**     | `int largeArray[10000];`                        | Dùng bộ nhớ toàn cục hoặc heap |
+| **1️⃣0️⃣ Sử dụng `volatile` khi cần thiết**   | `int sensorValue;` có thể bị tối ưu hóa sai     | `volatile int sensorValue;` |
+
+### 8. Quy tắc Biểu Thức và Toán Tử
+
+1️⃣ Tránh sử dụng các biểu thức phức tạp
+
+- Biểu thức phức tạp khó đọc, khó hiểu và dễ xảy ra lỗi logic.
+- Tách biểu thức giúp tăng độ rõ ràng và dễ bảo trì hơn.
+
+❌ Không tốt (Biểu thức quá phức tạp)
+```
+if ((x > 10 && y < 5) || (x <= 10 && y >= 5)) {
+    // do something
+}
+```
+🚨 Vấn đề:
+- Khó đọc, dễ mắc lỗi khi chỉnh sửa hoặc debug.
+
+✔️ Tốt (Tách biểu thức thành các điều kiện rõ ràng)
+```
+bool isXGreaterThanTen = (x > 10);
+bool isYLessThanFive = (y < 5);
+bool isXLessThanOrEqualToTen = (x <= 10);
+bool isYGreaterThanOrEqualToFive = (y >= 5);
+
+if ((isXGreaterThanTen && isYLessThanFive) || (isXLessThanOrEqualToTen && isYGreaterThanOrEqualToFive)) {
+    // do something
+}
+```
+
+✅ Lợi ích:
+- Dễ đọc hơn, dễ bảo trì hơn, ít lỗi hơn.
+
+2️⃣ Hạn chế sử dụng toán tử động (Dynamic Operator)
+
+- Truy cập con trỏ và ép kiểu dữ liệu có thể dẫn đến lỗi runtime khó debug.
+- Việc sử dụng con trỏ không hợp lệ có thể gây lỗi bộ nhớ nghiêm trọng.
+
+❌ Không tốt (Dùng toán tử động không an toàn)
+```
+int *ptr = NULL;
+int a = 10;
+ptr = &a; 
+*ptr = 20; // Có thể gây lỗi nếu không kiểm tra NULL trước
+
+float *fptr = NULL;
+fptr = (float *)&a; // Ép kiểu sai, có thể gây lỗi không xác định
+*fptr = 3.14; 
+```
+🚨 Vấn đề:
+- ptr chưa được kiểm tra NULL trước khi sử dụng.
+- fptr ép kiểu từ int sang float, gây lỗi dữ liệu không xác định.
+
+✔️ Tốt (Kiểm tra con trỏ và tránh ép kiểu nguy hiểm)
+```
+int *ptr = NULL;
+int a = 10;
+
+ptr = &a; 
+if (ptr != NULL) {
+    *ptr = 20;  // Đảm bảo an toàn khi truy cập con trỏ
+}
+```
+✅ Lợi ích:
+- Tránh lỗi bộ nhớ, tránh crash chương trình.
+
+3️⃣ Luôn sử dụng các toán tử an toàn
+
+- Toán tử &&, || hỗ trợ short-circuit evaluation, giúp tối ưu hiệu suất và tránh lỗi không mong muốn.
+
+- Tránh dùng & và | thay cho && và || vì có thể gây lỗi logic.
+
+❌ Không tốt (Dùng toán tử & thay vì &&)
+```
+if (a > 0 & b < 20) {  // Lỗi logic nếu `a > 0` nhưng `b` không nhỏ hơn 20
+    c = a + b;
+}
+```
+🚨 Vấn đề:
+- & luôn kiểm tra cả hai điều kiện, dẫn đến lỗi không mong muốn.
+
+✔️ Tốt (Dùng toán tử && để tối ưu logic)
+```
+if (a > 0 && b < 20) {  
+    c = a + b; // Chỉ thực hiện nếu cả hai điều kiện đều đúng
+}
+```
+✅ Lợi ích:
+- Tránh lỗi logic, tối ưu hiệu suất chương trình.
+
+4️⃣ Không sử dụng + để nối chuỗi
+
+- Trong C, toán tử + không hỗ trợ nối chuỗi như trong các ngôn ngữ khác (Java, Python).
+- Dùng sprintf() hoặc strcat() thay vì + để nối chuỗi.
+
+❌ Không tốt (Dùng toán tử + sai cách)
+```
+int x = 5;
+char str[10] = "hello";
+char new_str[20];
+
+sprintf(new_str, "%d" + str); // Lỗi! không thể nối số với chuỗi
+```
+
+✔️ Tốt (Dùng sprintf() hoặc strcat())
+```
+sprintf(new_str, "%d%s", x, str);  // Đúng, nối chuỗi số và chuỗi bằng format string
+```
+✅ Lợi ích:
+- Đúng cú pháp, tránh lỗi runtime.
+
+5️⃣ Hạn chế sử dụng toán tử bit (&, |, ^, ~) trên kiểu không phải số nguyên
+
+- Toán tử bit chỉ hoạt động đúng với kiểu số nguyên (int, unsigned int, char, …).
+- Dùng với float, double có thể gây lỗi biên dịch hoặc lỗi không xác định.
+
+❌ Không tốt (Dùng toán tử bit với float)
+```
+float a = 3.5;
+float b = 2.0;
+float c = a | b; // Lỗi biên dịch
+```
+✔️ Tốt (Chỉ dùng toán tử bit với số nguyên)
+```
+int a = 3;
+int b = 2;
+int c = a | b; // Đúng, toán tử bit chỉ áp dụng trên số nguyên
+```
+✅ Lợi ích:
+- Tránh lỗi biên dịch, đảm bảo chương trình chạy đúng.
+
+6️⃣ Sử dụng toán tử phù hợp với kiểu dữ liệu
+
+- Khi thực hiện phép toán giữa int và float, cần ép kiểu dữ liệu để tránh lỗi.
+
+❌ Không tốt (Không ép kiểu trước khi cộng)
+```
+int a = 5;
+float b = 2.5;
+float sum = a + b;  // Lỗi, kiểu int và float không khớp
+```
+
+✔️ Tốt (Ép kiểu trước khi thực hiện phép toán)
+```
+float sum = (float)a + b;  // Đúng, đảm bảo phép toán được thực hiện chính xác
+```
+✅ Lợi ích:
+- Tránh lỗi ép kiểu, đảm bảo độ chính xác của phép toán.
+
+7️⃣ Tránh sử dụng phép chia số nguyên nếu không cần thiết
+
+- Phép chia số nguyên (/) có thể làm tròn xuống (floor) thay vì giữ phần thập phân, gây sai lệch kết quả.
+- Nếu cần độ chính xác cao, nên ép kiểu sang float hoặc double.
+
+❌ Không tốt (Sử dụng phép chia số nguyên mà không ép kiểu)
+```
+int a = 5;
+int b = 2;
+float result = a / b;  // Kết quả: 2, không phải 2.5
+```
+🚨 Vấn đề:
+- Vì a và b đều là int, phép chia a / b sẽ bị làm tròn xuống, gây sai số.
+
+✔️ Tốt (Ép kiểu để tránh mất dữ liệu)
+```
+float result = (float)a / b;  // Kết quả: 2.5
+```
+✅ Lợi ích:
+- Giữ nguyên phần thập phân, đảm bảo tính toán chính xác.
+
+8️⃣ Không sử dụng toán tử tăng/giảm (++, --) trong biểu thức phức tạp
+
+- Toán tử ++ và -- có thể gây khó hiểu khi sử dụng trong các biểu thức phức tạp.
+- Hành vi không xác định có thể xảy ra khi sử dụng ++ hoặc -- nhiều lần trong một dòng.
+
+❌ Không tốt (Dùng ++ trong biểu thức phức tạp)
+```
+int x = 5;
+int y = x++ + ++x;  // Không rõ x được tăng trước hay sau, kết quả khó dự đoán
+```
+🚨 Vấn đề:
+- Hành vi không xác định, tùy vào trình biên dịch, có thể cho kết quả khác nhau.
+
+✔️ Tốt (Tách riêng toán tử ++)
+```
+int x = 5;
+int temp1 = x++;
+int temp2 = ++x;
+int y = temp1 + temp2;  // Rõ ràng hơn, tránh lỗi logic
+```
+✅ Lợi ích:
+- Dễ hiểu, dễ debug, tránh hành vi không mong muốn.
+
+9️⃣ Không sử dụng toán tử gán (=) bên trong điều kiện if
+
+- Dễ gây nhầm lẫn với toán tử so sánh ==, dẫn đến lỗi logic khó phát hiện.
+- Một số trình biên dịch có thể không cảnh báo lỗi khi nhầm = với ==.
+
+❌ Không tốt (Gán nhầm thay vì so sánh)
+```
+if (x = 5) {  // Sai, vì x được gán 5 thay vì so sánh với 5
+    printf("x bằng 5\n");
+}
+```
+🚨 Vấn đề:
+- x = 5 sẽ luôn trả về true, gây lỗi logic.
+
+✔️ Tốt (Dùng == để so sánh, không gán)
+```
+if (x == 5) {  // Đúng, vì kiểm tra điều kiện thay vì gán giá trị
+    printf("x bằng 5\n");
+}
+```
+✅ Lợi ích:
+- Tránh lỗi logic khó phát hiện, đảm bảo đúng điều kiện kiểm tra.
+
+🔟 Tránh sử dụng toán tử ? : (toán tử ba ngôi) trong các biểu thức dài
+
+- Toán tử ba ngôi (condition ? true_value : false_value) có thể gây khó đọc nếu lồng nhau.
+- Dễ gây nhầm lẫn, giảm khả năng bảo trì.
+
+❌ Không tốt (Toán tử ba ngôi lồng nhau, khó đọc)
+```
+int result = (x > 0) ? ((y > 0) ? 1 : -1) : 0;  // Khó hiểu
+```
+
+✔️ Tốt (Dùng if-else để rõ ràng hơn)
+```
+int result;
+if (x > 0) {
+    if (y > 0) {
+        result = 1;
+    } else {
+        result = -1;
+    }
+} else {
+    result = 0;
+}
+```
+✅ Lợi ích:
+- Dễ đọc, dễ hiểu, dễ bảo trì.
+
+1️⃣1️⃣ Hạn chế sử dụng phép toán modulo (%) nếu có thể
+
+- Phép toán % (chia lấy dư) tốn nhiều chu kỳ CPU, có thể ảnh hưởng đến hiệu suất trên vi điều khiển.
+- Nếu có thể, nên thay thế bằng phép toán dịch bit hoặc phép toán khác hiệu quả hơn.
+
+❌ Không tốt (Dùng % khi có thể thay thế bằng phép khác)
+```
+if (x % 2 == 0) {  // Kiểm tra số chẵn
+    printf("x là số chẵn\n");
+}
+```
+
+✔️ Tốt (Dùng phép toán bit nhanh hơn)
+```
+if ((x & 1) == 0) {  // Kiểm tra số chẵn bằng toán tử bitwise
+    printf("x là số chẵn\n");
+}
+```
+✅ Lợi ích:
+- Tối ưu tốc độ tính toán, đặc biệt quan trọng trong hệ thống nhúng.
+
+📌 Bảng Tổng Hợp Quy Tắc Biểu Thức và Toán Tử (Autosar C Coding Guidelines)
+
+| STT  | Quy tắc                                      | Không tốt ❌                                    | Tốt ✔️                                       |
+|------|---------------------------------------------|-----------------------------------------------|----------------------------------------------|
+| **1️⃣**  | Tránh sử dụng biểu thức phức tạp                | `(x > 10 && y < 5) || (x <= 10 && y >= 5)`  | Tách thành **các biến `bool` rõ ràng**       |
+| **2️⃣**  | Hạn chế sử dụng toán tử động                     | `float *fptr = (float *)&a;`                 | **Kiểm tra con trỏ NULL trước khi sử dụng**  |
+| **3️⃣**  | Sử dụng toán tử logic an toàn (`&&`, `||`)       | `if (a > 0 & b < 20)`                        | `if (a > 0 && b < 20)`                       |
+| **4️⃣**  | Không sử dụng `+` để nối chuỗi                  | `sprintf(new_str, "%d" + str);`              | `sprintf(new_str, "%d%s", x, str);`          |
+| **5️⃣**  | Hạn chế sử dụng toán tử bit với `float`         | `float c = a | b;`                           | **Chỉ dùng toán tử bit với kiểu số nguyên** |
+| **6️⃣**  | Dùng toán tử phù hợp với kiểu dữ liệu           | `float sum = a + b;`                         | `float sum = (float)a + b;`                   |
+| **7️⃣**  | Tránh sử dụng phép chia số nguyên không cần thiết | `float result = a / b;`                     | `float result = (float)a / b;`                |
+| **8️⃣**  | Không dùng `++/--` trong biểu thức phức tạp      | `y = x++ + ++x;`                           | **Tách riêng từng phép toán** để rõ ràng hơn |
+| **9️⃣**  | Không gán (`=`) bên trong `if`                  | `if (x = 5)`                                | `if (x == 5)`                                 |
+| **🔟**  | Tránh sử dụng toán tử ba ngôi (`?:`) quá dài      | `result = (x > 0) ? ((y > 0) ? 1 : -1) : 0;`| **Dùng `if-else` để rõ ràng hơn**            |
+| **1️⃣1️⃣** | Hạn chế dùng `%` nếu có thể thay thế         | `if (x % 2 == 0)`                          | `if ((x & 1) == 0)`                          |
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ---
